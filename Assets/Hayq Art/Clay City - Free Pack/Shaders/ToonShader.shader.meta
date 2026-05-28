@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 54ab6b71854b1d3439ceb225e5295af9
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 232445
+  packageName: House and Character FREE Pack with Toon Shader
+  packageVersion: 1.0
+  assetPath: Assets/Hayq Art/Clay City - Free Pack/Shaders/ToonShader.shader
+  uploadId: 603534
