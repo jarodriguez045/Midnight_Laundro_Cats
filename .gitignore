@@ -1,4 +1,4 @@
-cat > .gitignore << 'EOF'
+# Unity generated
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -6,7 +6,14 @@ cat > .gitignore << 'EOF'
 [Bb]uilds/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
+MemoryCaptures/
+Recordings/
 
+# IDE / OS
+.DS_Store
+.vs/
+.vscode/
+.idea/
 *.csproj
 *.sln
 *.slnx
@@ -19,11 +26,15 @@ cat > .gitignore << 'EOF'
 *.opendb
 *.VC.db
 
-.DS_Store
-.vscode/
-.idea/
-
+# Builds / packages
 *.apk
 *.aab
 *.unitypackage
-EOF.DS_Store
+*.app
+
+# Local agent backups (not source of truth)
+AGENTS.md.backup.*
+AGENTS.md.bak-*
+
+# Crash / recovery scratch (keep intentional Recovery assets if needed later)
+CrashReports/
