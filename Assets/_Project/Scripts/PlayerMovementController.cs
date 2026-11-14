@@ -17,6 +17,7 @@ public class PlayerMovementController : MonoBehaviour
     [SerializeField] float groundCheckOffset = 0.08f;
 
     Rigidbody _body;
+    CapsuleCollider _capsule;
     bool _controlLocked;
     bool _jumpRequested;
     bool _isGrounded;
@@ -39,6 +40,7 @@ public class PlayerMovementController : MonoBehaviour
     void Awake()
     {
         _body = GetComponent<Rigidbody>();
+        _capsule = GetComponent<CapsuleCollider>();
         _body.freezeRotation = true;
         _body.interpolation = RigidbodyInterpolation.Interpolate;
     }
@@ -148,7 +150,12 @@ public class PlayerMovementController : MonoBehaviour
 
     void UpdateGrounded()
     {
-        Vector3 origin = transform.position + Vector3.up * (groundCheckRadius + groundCheckOffset);
+        // Capsule transform is at collider center; probe from the capsule bottom so the
+        // sphere overlaps the supporting surface (height 2 / center 0 => feet ~1u below).
+        Vector3 localCenter = _capsule != null ? _capsule.center : Vector3.zero;
+        float halfHeight = _capsule != null ? _capsule.height * 0.5f : 1f;
+        Vector3 feet = transform.TransformPoint(localCenter + Vector3.down * halfHeight);
+        Vector3 origin = feet + Vector3.up * (groundCheckRadius - groundCheckOffset);
         _isGrounded = Physics.CheckSphere(origin, groundCheckRadius, groundMask, QueryTriggerInteraction.Ignore);
     }
 

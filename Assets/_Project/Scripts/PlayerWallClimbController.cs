@@ -63,9 +63,11 @@ public class PlayerWallClimbController : MonoBehaviour
         }
 
         _wallNormal = hit.normal;
+        // Cast origin matches TryFindWall; project hold error onto the wall normal only so
+        // distance correction cannot introduce climb-axis (up/down) motion.
+        Vector3 castOrigin = transform.position + Vector3.up;
         Vector3 holdPoint = hit.point + hit.normal * wallHoldDistance;
-        Vector3 toHold = holdPoint - transform.position;
-        toHold = Vector3.ProjectOnPlane(toHold, Vector3.up) + Vector3.up * toHold.y;
+        Vector3 toHoldAlongNormal = Vector3.Project(holdPoint - castOrigin, hit.normal);
 
         Camera cam = inputCamera != null ? inputCamera : Camera.main;
         Vector3 up = Vector3.up;
@@ -83,7 +85,7 @@ public class PlayerWallClimbController : MonoBehaviour
 
         Vector3 climbVelocity = climbUp * vertical * climbSpeed + right * horizontal * sidewaysSpeed;
         Vector3 stick = -hit.normal * wallStickForce;
-        Vector3 correction = toHold / Time.fixedDeltaTime;
+        Vector3 correction = toHoldAlongNormal / Time.fixedDeltaTime;
         correction = Vector3.ClampMagnitude(correction, climbSpeed * 2f);
 
         _body.useGravity = false;
