@@ -150,13 +150,40 @@ public class PlayerMovementController : MonoBehaviour
 
     void UpdateGrounded()
     {
-        // Capsule transform is at collider center; probe from the capsule bottom so the
-        // sphere overlaps the supporting surface (height 2 / center 0 => feet ~1u below).
+        // Player capsule: height 2, center 0 → transform is mid-body; feet are ~1u below.
+        // Never probe from transform.position upward — that sits above the capsule center
+        // and misses the floor. Cast downward from the capsule center past the feet.
         Vector3 localCenter = _capsule != null ? _capsule.center : Vector3.zero;
-        float halfHeight = _capsule != null ? _capsule.height * 0.5f : 1f;
+        float capsuleRadius = _capsule != null ? _capsule.radius : 0.5f;
+        float halfHeight = _capsule != null ? Mathf.Max(_capsule.height * 0.5f, capsuleRadius) : 1f;
+        float probeRadius = Mathf.Min(groundCheckRadius, Mathf.Max(0.05f, capsuleRadius - 0.05f));
+
+        Vector3 castOrigin = transform.TransformPoint(localCenter);
+        // Distance from center to feet, minus probe radius, plus skin so we overlap the floor.
+        float castDistance = halfHeight - probeRadius + groundCheckOffset;
+        if (castDistance < groundCheckOffset)
+        {
+            castDistance = groundCheckOffset;
+        }
+
+        Vector3 down = -transform.up;
+        if (Physics.SphereCast(
+                castOrigin,
+                probeRadius,
+                down,
+                out _,
+                castDistance,
+                groundMask,
+                QueryTriggerInteraction.Ignore))
+        {
+            _isGrounded = true;
+            return;
+        }
+
+        // Fallback: CheckSphere centered just above the feet (overlaps floor by offset).
         Vector3 feet = transform.TransformPoint(localCenter + Vector3.down * halfHeight);
-        Vector3 origin = feet + Vector3.up * (groundCheckRadius - groundCheckOffset);
-        _isGrounded = Physics.CheckSphere(origin, groundCheckRadius, groundMask, QueryTriggerInteraction.Ignore);
+        Vector3 feetProbe = feet + transform.up * probeRadius - transform.up * groundCheckOffset;
+        _isGrounded = Physics.CheckSphere(feetProbe, probeRadius, groundMask, QueryTriggerInteraction.Ignore);
     }
 
     static Vector2 ReadMoveInput()
