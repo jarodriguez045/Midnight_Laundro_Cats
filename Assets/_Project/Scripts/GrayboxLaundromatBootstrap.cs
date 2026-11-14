@@ -58,15 +58,15 @@ public class GrayboxLaundromatBootstrap : MonoBehaviour
         CreateBox(root, "GrayboxFloor", new Vector3(center.x, center.y, center.z), new Vector3(28f, 0.25f, 20f),
             new Color(0.22f, 0.22f, 0.24f), GroundLayer);
 
-        // Room walls (default layer for blocking).
+        // Room walls on Ground (8) so ThirdPersonCameraController.collisionMask (8|11) hits them.
         float wallHeight = 5.5f;
         float wallY = center.y + wallHeight * 0.5f;
         CreateBox(root, "Wall_North", new Vector3(center.x, wallY, center.z + 10f), new Vector3(28f, wallHeight, 0.35f),
-            new Color(0.35f, 0.38f, 0.45f), 0);
+            new Color(0.35f, 0.38f, 0.45f), GroundLayer);
         CreateBox(root, "Wall_South", new Vector3(center.x, wallY, center.z - 10f), new Vector3(28f, wallHeight, 0.35f),
-            new Color(0.35f, 0.38f, 0.45f), 0);
+            new Color(0.35f, 0.38f, 0.45f), GroundLayer);
         CreateBox(root, "Wall_East", new Vector3(center.x + 14f, wallY, center.z), new Vector3(0.35f, wallHeight, 20f),
-            new Color(0.32f, 0.34f, 0.4f), 0);
+            new Color(0.32f, 0.34f, 0.4f), GroundLayer);
 
         // Climbable west wall (layer 11).
         CreateBox(root, "ClimbWall_West", new Vector3(center.x - 14f, wallY, center.z), new Vector3(0.35f, wallHeight, 20f),
