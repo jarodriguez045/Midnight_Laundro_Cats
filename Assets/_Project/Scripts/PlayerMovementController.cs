@@ -21,6 +21,8 @@ public class PlayerMovementController : MonoBehaviour
     bool _controlLocked;
     bool _jumpRequested;
     bool _isGrounded;
+    bool _useDebugMoveInput;
+    Vector2 _debugMoveInput;
 
     public bool IsGrounded => _isGrounded;
     public bool IsRunning { get; private set; }
@@ -148,6 +150,19 @@ public class PlayerMovementController : MonoBehaviour
         _body.linearVelocity = v;
     }
 
+    /// <summary>Test/CLI hook so Play Mode verifiers can drive move without OS input.</summary>
+    public void SetDebugMoveInput(Vector2 input)
+    {
+        _useDebugMoveInput = true;
+        _debugMoveInput = input;
+    }
+
+    public void ClearDebugMoveInput()
+    {
+        _useDebugMoveInput = false;
+        _debugMoveInput = Vector2.zero;
+    }
+
     void UpdateGrounded()
     {
         // Player capsule: height 2, center 0 → transform is mid-body; feet are ~1u below.
@@ -186,8 +201,13 @@ public class PlayerMovementController : MonoBehaviour
         _isGrounded = Physics.CheckSphere(feetProbe, probeRadius, groundMask, QueryTriggerInteraction.Ignore);
     }
 
-    static Vector2 ReadMoveInput()
+    Vector2 ReadMoveInput()
     {
+        if (_useDebugMoveInput)
+        {
+            return _debugMoveInput;
+        }
+
         return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
     }
 }
