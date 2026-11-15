@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "spawnPass": true,
+  "movePass": true,
+  "insideGrayboxBounds": true,
+  "prototypeFloorActive": false,
+  "grayFloorFound": true,
+  "groundedDuringMove": true,
+  "groundedTrue": 40,
+  "groundedSamples": 40,
+  "deltaXZ": 5.124,
+  "maxPlanarSpeed": 7.00,
+  "playerPos": "(-79.46, 7.02, 15.02)",
+  "floorPos": "(-79.49, 5.90, 14.90)",
+  "scene": "LaundryPrototype",
+  "method": "Pipeline Play Mode + script.run; forced planar drive while IsGrounded",
+  "log": "scene=LaundryPrototype path=Assets/_Project/Scenes/LaundryPrototype.unity frame=711 time=4.801\npos0=(-79.46, 7.02, 15.02) grounded0=True locked=False vel0=(0.00, 0.00, 0.00)\ngrayFloor=True prototypeActive=False\ninsideGrayboxBounds=True floorPos=(-79.49, 5.90, 14.90)\ndeltaXZ=5.124 groundedTrue=40/40 maxPlanarSpeed=7.00 end=(-79.46, 7.02, 20.14)\nspawnPass=True movePass=True\n"
+}

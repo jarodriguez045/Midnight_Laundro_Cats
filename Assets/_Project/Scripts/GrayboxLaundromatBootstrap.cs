@@ -45,17 +45,34 @@ public class GrayboxLaundromatBootstrap : MonoBehaviour
             }
         }
 
+        // The oversized Prototype Walkable Floor Collider (layer Ground) sits under the
+        // capsule and overlaps GrayboxFloor. Dual Ground colliders + grounded stick force
+        // sandwiches the capsule so planar move feels stuck while air control still works.
+        DisableCompetingGroundFloors();
+
         Transform origin = ResolveAnchor();
         Vector3 center = origin.position;
-        // Keep graybox floor aligned under the capsule spawn.
-        center.y = origin.position.y - 1.05f;
+
+        // Align graybox floor TOP to capsule feet (not an arbitrary mid-body offset).
+        float halfHeight = 1f;
+        CapsuleCollider capsule = origin != null ? origin.GetComponent<CapsuleCollider>() : null;
+        if (capsule != null)
+        {
+            halfHeight = Mathf.Max(capsule.height * 0.5f, capsule.radius);
+        }
+
+        const float floorThickness = 0.25f;
+        // Seat floor just under the feet so the capsule is not born penetrating Ground.
+        float feetY = origin.position.y - halfHeight;
+        float floorTop = feetY - 0.02f;
+        center.y = floorTop - floorThickness * 0.5f;
 
         Transform root = new GameObject("GrayboxLaundromat").transform;
         root.SetParent(transform, false);
         root.position = Vector3.zero;
 
         // Visible floor on Ground layer (matches movement/camera masks with layer 8).
-        CreateBox(root, "GrayboxFloor", new Vector3(center.x, center.y, center.z), new Vector3(28f, 0.25f, 20f),
+        CreateBox(root, "GrayboxFloor", new Vector3(center.x, center.y, center.z), new Vector3(28f, floorThickness, 20f),
             new Color(0.22f, 0.22f, 0.24f), GroundLayer);
 
         // Room walls on Ground (8) so ThirdPersonCameraController.collisionMask (8|11) hits them.
@@ -112,6 +129,44 @@ public class GrayboxLaundromatBootstrap : MonoBehaviour
         return transform;
     }
 
+    static void DisableCompetingGroundFloors()
+    {
+        GameObject prototypeFloor = GameObject.Find("Prototype Walkable Floor Collider");
+        if (prototypeFloor != null)
+        {
+            prototypeFloor.SetActive(false);
+            return;
+        }
+
+        // Fallback: disable any oversized Ground-layer box near spawn that isn't ours yet.
+        Collider[] colliders = UnityEngine.Object.FindObjectsByType<Collider>(FindObjectsSortMode.None);
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            Collider col = colliders[i];
+            if (col == null || col.gameObject.layer != GroundLayer)
+            {
+                continue;
+            }
+
+            if (col.gameObject.name.StartsWith("Graybox", System.StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            BoxCollider box = col as BoxCollider;
+            if (box == null)
+            {
+                continue;
+            }
+
+            Vector3 worldSize = Vector3.Scale(box.size, box.transform.lossyScale);
+            if (worldSize.x > 40f && worldSize.z > 40f)
+            {
+                col.gameObject.SetActive(false);
+            }
+        }
+    }
+
     static void CreateBox(Transform parent, string name, Vector3 position, Vector3 scale, Color color, int layer)
     {
         GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -121,6 +176,21 @@ public class GrayboxLaundromatBootstrap : MonoBehaviour
         go.transform.position = position;
         go.transform.localRotation = Quaternion.identity;
         go.transform.localScale = scale;
+
+        // Zero friction so grounded velocity from PlayerMovementController isn't eaten by PhysX.
+        Collider col = go.GetComponent<Collider>();
+        if (col != null)
+        {
+            PhysicsMaterial slip = new PhysicsMaterial("GrayboxSlip")
+            {
+                dynamicFriction = 0f,
+                staticFriction = 0f,
+                bounciness = 0f,
+                frictionCombine = PhysicsMaterialCombine.Minimum,
+                bounceCombine = PhysicsMaterialCombine.Minimum
+            };
+            col.sharedMaterial = slip;
+        }
 
         Renderer renderer = go.GetComponent<Renderer>();
         if (renderer != null)
